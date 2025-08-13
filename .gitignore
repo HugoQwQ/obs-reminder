@@ -1,0 +1,9 @@
+.DS_Store
+**/target
+.vscode/
+.kiro/
+.cursor/
+.idea/
+
+# Production build artifacts
+client/browser/
