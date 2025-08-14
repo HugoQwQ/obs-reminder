@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM --- Get version from Cargo.toml (ignore leading spaces) ---
+REM --- Get version from Cargo.toml ---
 for /f "tokens=2 delims==" %%i in ('findstr /R "^[ ]*version[ ]*=" Cargo.toml') do (
     set ver=%%i
     REM Remove quotes

@@ -5,6 +5,10 @@
   let isConnected = false;
   let websocket: WebSocket | null = null;
   const WEBSOCKET_URL = "ws://localhost:7981";
+  let options = {
+    intro: undefined as import("svelte/transition").FlyParams | undefined,
+    reversed: undefined as boolean | undefined,
+  };
 
   interface ToastMessage {
     title: string;
@@ -15,6 +19,7 @@
     duration: number;
     play_sound: boolean;
     sound_url?: string;
+    direction: string;
   }
 
   interface WebSocketMessage {
@@ -65,32 +70,32 @@
   function playNotificationSound(soundUrl?: string) {
     try {
       if (!soundUrl) {
-        console.log('No sound URL provided');
+        console.log("No sound URL provided");
         return;
       }
 
-      console.log('Attempting to play sound:', soundUrl);
+      console.log("Attempting to play sound:", soundUrl);
 
       // 创建音频对象，使用用户选择的音频文件
       const audio = new Audio(soundUrl);
       audio.volume = 0.7; // 设置音量为70%
 
       // 添加事件监听器来调试
-      audio.addEventListener('loadstart', () => {
-        console.log('Audio loading started');
+      audio.addEventListener("loadstart", () => {
+        console.log("Audio loading started");
       });
 
-      audio.addEventListener('canplay', () => {
-        console.log('Audio can start playing');
+      audio.addEventListener("canplay", () => {
+        console.log("Audio can start playing");
       });
 
-      audio.addEventListener('error', (e) => {
-        console.error('Audio error event:', e);
-        console.error('Audio error details:', audio.error);
+      audio.addEventListener("error", (e) => {
+        console.error("Audio error event:", e);
+        console.error("Audio error details:", audio.error);
       });
 
-      audio.addEventListener('loadeddata', () => {
-        console.log('Audio data loaded');
+      audio.addEventListener("loadeddata", () => {
+        console.log("Audio data loaded");
       });
 
       // 尝试播放
@@ -99,22 +104,45 @@
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            console.log('Audio played successfully');
+            console.log("Audio played successfully");
           })
-          .catch(error => {
-            console.error('Audio play failed:', error);
-            console.error('Error name:', error.name);
-            console.error('Error message:', error.message);
+          .catch((error) => {
+            console.error("Audio play failed:", error);
+            console.error("Error name:", error.name);
+            console.error("Error message:", error.message);
           });
       }
     } catch (error) {
-      console.error('Audio creation failed:', error);
+      console.error("Audio creation failed:", error);
     }
   }
 
   function showToast(data: ToastMessage) {
     if (data.play_sound && data.sound_url) {
       playNotificationSound(data.sound_url);
+    }
+
+    // 根据方向设置动画参数
+    switch (data.direction) {
+      case "top":
+        options.intro = { y: -100, duration: 300 };
+        options.reversed = false;
+        break;
+      case "bottom":
+        options.intro = { y: 100, duration: 300 };
+        options.reversed = false;
+        break;
+      case "left":
+        options.intro = { x: -100, duration: 300 };
+        options.reversed = false;
+        break;
+      case "right":
+        options.intro = { x: 100, duration: 300 };
+        options.reversed = true;
+        break;
+      default:
+        options.intro = { y: -100, duration: 300 };
+        options.reversed = false;
     }
 
     toast.push(`${data.title}<br><strong>${data.content}</strong>`, {
@@ -140,7 +168,7 @@
 </script>
 
 <main>
-  <SvelteToast />
+  <SvelteToast {options} />
 </main>
 
 <style>

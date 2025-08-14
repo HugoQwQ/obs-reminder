@@ -1,5 +1,5 @@
 use crate::audio_manager::AudioManager;
-use crate::config::{Config, ContentSwitchMode};
+use crate::config::{Config, ContentSwitchMode, ToastDirection};
 use crate::http_server::HttpServer;
 use crate::timer::TimerService;
 use crate::websocket::{WebSocketMessage, WebSocketServer};
@@ -93,6 +93,7 @@ impl ObsReminderApp {
     fn render_settings(&mut self, ui: &mut egui::Ui) {
         ui.heading("设置");
 
+        // Content
         // Toaster titles section
         ui.label("通知标题: (允许多行)");
 
@@ -120,8 +121,6 @@ impl ObsReminderApp {
                 self.new_title.clear();
             }
         });
-
-        ui.separator();
 
         // Toaster contents section
         ui.label("通知内容: (允许多行)");
@@ -151,6 +150,27 @@ impl ObsReminderApp {
             }
         });
 
+        ui.horizontal(|ui| {
+            ui.label("内容切换模式:");
+            egui::ComboBox::from_id_salt("switch_mode")
+                .selected_text(match self.config.toaster.content_switch_mode {
+                    ContentSwitchMode::Random => "随机",
+                    ContentSwitchMode::Sequential => "顺序",
+                })
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut self.config.toaster.content_switch_mode,
+                        ContentSwitchMode::Random,
+                        "随机",
+                    );
+                    ui.selectable_value(
+                        &mut self.config.toaster.content_switch_mode,
+                        ContentSwitchMode::Sequential,
+                        "顺序",
+                    );
+                });
+        });
+
         ui.separator();
 
         // Interval time
@@ -167,7 +187,7 @@ impl ObsReminderApp {
 
         ui.separator();
 
-        // Colors
+        // Appearance
         ui.horizontal(|ui| {
             ui.label("通知颜色 #1:");
 
@@ -205,6 +225,39 @@ impl ObsReminderApp {
             }
 
             ui.label(&self.config.toaster.text_color);
+        });
+
+        ui.horizontal(|ui| {
+            ui.label("进入方向:");
+            egui::ComboBox::from_id_salt("toast_direction")
+                .selected_text(match self.config.toaster.toast_direction {
+                    ToastDirection::Top => "从上方",
+                    ToastDirection::Bottom => "从下方",
+                    ToastDirection::Left => "从左侧",
+                    ToastDirection::Right => "从右侧",
+                })
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut self.config.toaster.toast_direction,
+                        ToastDirection::Top,
+                        "从上方",
+                    );
+                    ui.selectable_value(
+                        &mut self.config.toaster.toast_direction,
+                        ToastDirection::Bottom,
+                        "从下方",
+                    );
+                    ui.selectable_value(
+                        &mut self.config.toaster.toast_direction,
+                        ToastDirection::Left,
+                        "从左侧",
+                    );
+                    ui.selectable_value(
+                        &mut self.config.toaster.toast_direction,
+                        ToastDirection::Right,
+                        "从右侧",
+                    );
+                });
         });
 
         ui.separator();
@@ -275,30 +328,6 @@ impl ObsReminderApp {
                 }
             });
         }
-
-        ui.separator();
-
-        // Content switch mode
-        ui.horizontal(|ui| {
-            ui.label("内容切换模式:");
-            egui::ComboBox::from_id_salt("switch_mode")
-                .selected_text(match self.config.toaster.content_switch_mode {
-                    ContentSwitchMode::Random => "随机",
-                    ContentSwitchMode::Sequential => "顺序",
-                })
-                .show_ui(ui, |ui| {
-                    ui.selectable_value(
-                        &mut self.config.toaster.content_switch_mode,
-                        ContentSwitchMode::Random,
-                        "随机",
-                    );
-                    ui.selectable_value(
-                        &mut self.config.toaster.content_switch_mode,
-                        ContentSwitchMode::Sequential,
-                        "顺序",
-                    );
-                });
-        });
     }
 
     fn render_controls(&mut self, ui: &mut egui::Ui) {
@@ -473,6 +502,13 @@ impl ObsReminderApp {
                 None
             };
 
+            let direction = match self.config.toaster.toast_direction {
+                ToastDirection::Top => "top",
+                ToastDirection::Bottom => "bottom",
+                ToastDirection::Left => "left",
+                ToastDirection::Right => "right",
+            }.to_string();
+
             let message = WebSocketMessage::new_toast(
                 title.clone(),
                 content.clone(),
@@ -482,6 +518,7 @@ impl ObsReminderApp {
                 self.config.toaster.duration,
                 self.config.toaster.enable_sound,
                 sound_url,
+                direction,
             );
 
             if let Err(e) = sender.send(message) {
@@ -530,6 +567,13 @@ impl ObsReminderApp {
                 None
             };
 
+            let direction = match self.config.toaster.toast_direction {
+                ToastDirection::Top => "top",
+                ToastDirection::Bottom => "bottom",
+                ToastDirection::Left => "left",
+                ToastDirection::Right => "right",
+            }.to_string();
+
             let message = WebSocketMessage::new_toast(
                 title,
                 content,
@@ -539,6 +583,7 @@ impl ObsReminderApp {
                 self.config.toaster.duration,
                 self.config.toaster.enable_sound,
                 sound_url,
+                direction,
             );
 
             if let Err(e) = sender.send(message) {

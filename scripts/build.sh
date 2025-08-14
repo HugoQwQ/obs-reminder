@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# --- Get version from Cargo.toml, ignore leading spaces ---
+# --- Get version from Cargo.toml ---
 VERSION=$(grep -m 1 '^[[:space:]]*version[[:space:]]*=' Cargo.toml | sed -E 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*"([^"]+)"/\1/')
 echo "Building obs-reminder v$VERSION"
 

@@ -18,6 +18,7 @@ pub struct ToastMessage {
     pub duration: u32,
     pub play_sound: bool,
     pub sound_url: Option<String>,
+    pub direction: String, // "top", "bottom", "left", "right"
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,6 +38,7 @@ impl WebSocketMessage {
         duration_seconds: u32,
         play_sound: bool,
         sound_url: Option<String>,
+        direction: String,
     ) -> Self {
         Self {
             r#type: "toast".to_string(),
@@ -49,6 +51,7 @@ impl WebSocketMessage {
                 duration: duration_seconds * 1000,
                 play_sound,
                 sound_url,
+                direction,
             },
         }
     }
