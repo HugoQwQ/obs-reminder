@@ -4,10 +4,10 @@ use crate::http_server::HttpServer;
 use crate::timer::TimerService;
 use crate::websocket::{WebSocketMessage, WebSocketServer};
 use eframe::egui;
+use open;
 use std::sync::Arc;
 use tokio::sync::broadcast;
 
-#[warn(dead_code)]
 pub struct ObsReminderApp {
     config: Config,
     config_path: String,
@@ -17,10 +17,8 @@ pub struct ObsReminderApp {
     new_content: String,
 
     // Services
-    websocket_server: Option<Arc<WebSocketServer>>,
     websocket_sender: Option<broadcast::Sender<WebSocketMessage>>,
     timer_service: Option<TimerService>,
-    http_server: Option<HttpServer>,
 
     // Status
     is_running: bool,
@@ -55,9 +53,7 @@ impl ObsReminderApp {
 
         Self {
             timer_service: Some(TimerService::new(&config)),
-            websocket_server: Some(websocket_server),
             websocket_sender: Some(websocket_sender),
-            http_server: Some(http_server),
             config,
             config_path,
             new_title: String::new(),
@@ -215,9 +211,12 @@ impl ObsReminderApp {
 
         // Sound settings
         ui.heading("Sound Settings");
-        
+
         ui.horizontal(|ui| {
-            ui.checkbox(&mut self.config.toaster.enable_sound, "Enable sound notifications");
+            ui.checkbox(
+                &mut self.config.toaster.enable_sound,
+                "Enable sound notifications",
+            );
         });
 
         if self.config.toaster.enable_sound {
@@ -228,56 +227,54 @@ impl ObsReminderApp {
                 } else {
                     ui.label("No file selected");
                 }
-                
-                if ui.button("Browse...").clicked() {
-                    if let Some(path) = rfd::FileDialog::new()
+
+                if ui.button("Browse...").clicked()
+                    && let Some(path) = rfd::FileDialog::new()
                         .add_filter("Audio files", &["mp3", "wav", "ogg", "m4a"])
                         .pick_file()
-                    {
-                        // Get the filename for display
-                        let filename = path.file_name()
-                            .and_then(|name| name.to_str())
-                            .unwrap_or("Unknown file")
-                            .to_string();
-                        
-                        // Create audio manager and add the file
-                        match AudioManager::new() {
-                            Ok(audio_manager) => {
-                                match audio_manager.add_audio_file(&path) {
-                                    Ok(file_id) => {
-                                        // Remove old file if exists
-                                        if let Some(old_id) = &self.config.toaster.sound_file_id {
-                                            let _ = audio_manager.remove_audio_file(old_id);
-                                        }
-                                        
-                                        self.config.toaster.sound_file_id = Some(file_id);
-                                        self.config.toaster.sound_file_name = Some(filename);
-                                        log::info!("Audio file added successfully");
+                {
+                    // Get the filename for display
+                    let filename = path
+                        .file_name()
+                        .and_then(|name| name.to_str())
+                        .unwrap_or("Unknown file")
+                        .to_string();
+
+                    // Create audio manager and add the file
+                    match AudioManager::new() {
+                        Ok(audio_manager) => {
+                            match audio_manager.add_audio_file(&path) {
+                                Ok(file_id) => {
+                                    // Remove old file if exists
+                                    if let Some(old_id) = &self.config.toaster.sound_file_id {
+                                        let _ = audio_manager.remove_audio_file(old_id);
                                     }
-                                    Err(e) => {
-                                        log::error!("Failed to add audio file: {}", e);
-                                    }
+
+                                    self.config.toaster.sound_file_id = Some(file_id);
+                                    self.config.toaster.sound_file_name = Some(filename);
+                                    log::info!("Audio file added successfully");
+                                }
+                                Err(e) => {
+                                    log::error!("Failed to add audio file: {}", e);
                                 }
                             }
-                            Err(e) => {
-                                log::error!("Failed to create audio manager: {}", e);
-                            }
+                        }
+                        Err(e) => {
+                            log::error!("Failed to create audio manager: {}", e);
                         }
                     }
                 }
-                
-                if self.config.toaster.sound_file_id.is_some() {
-                    if ui.button("Clear").clicked() {
-                        // Remove the cached file
-                        if let Some(file_id) = &self.config.toaster.sound_file_id {
-                            if let Ok(audio_manager) = AudioManager::new() {
-                                let _ = audio_manager.remove_audio_file(file_id);
-                            }
-                        }
-                        
-                        self.config.toaster.sound_file_id = None;
-                        self.config.toaster.sound_file_name = None;
+
+                if self.config.toaster.sound_file_id.is_some() && ui.button("Clear").clicked() {
+                    // Remove the cached file
+                    if let Some(file_id) = &self.config.toaster.sound_file_id
+                        && let Ok(audio_manager) = AudioManager::new()
+                    {
+                        let _ = audio_manager.remove_audio_file(file_id);
                     }
+
+                    self.config.toaster.sound_file_id = None;
+                    self.config.toaster.sound_file_name = None;
                 }
             });
         }
@@ -376,6 +373,13 @@ impl ObsReminderApp {
                 ui.colored_label(egui::Color32::from_rgb(0, 150, 0), "localhost:8080");
                 if ui.button("Copy").clicked() {
                     ui.ctx().copy_text("http://localhost:8080".to_string());
+                }
+                if ui.button("Open").clicked() {
+                    tokio::spawn(async {
+                        if let Err(e) = open::that("http://localhost:8080") {
+                            log::error!("Failed to open browser: {}", e);
+                        }
+                    });
                 }
             });
         });
@@ -565,19 +569,18 @@ impl ObsReminderApp {
 impl eframe::App for ObsReminderApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Clear expired test toast cooldown
-        if let Some(cooldown_end) = self.test_toast_cooldown {
-            if std::time::Instant::now() >= cooldown_end {
-                self.test_toast_cooldown = None;
-            }
+        if let Some(cooldown_end) = self.test_toast_cooldown
+            && std::time::Instant::now() >= cooldown_end
+        {
+            self.test_toast_cooldown = None;
         }
 
         // Check if it's time to send a toast
-        if self.is_running {
-            if let Some(ref mut timer) = self.timer_service {
-                if timer.should_send_toast() {
-                    self.send_automatic_toast();
-                }
-            }
+        if self.is_running
+            && let Some(ref mut timer) = self.timer_service
+            && timer.should_send_toast()
+        {
+            self.send_automatic_toast();
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -600,12 +603,11 @@ fn hex_to_color32(hex: &str) -> egui::Color32 {
     }
 
     let hex = &hex[1..]; // Remove '#'
-    if let Ok(r) = u8::from_str_radix(&hex[0..2], 16) {
-        if let Ok(g) = u8::from_str_radix(&hex[2..4], 16) {
-            if let Ok(b) = u8::from_str_radix(&hex[4..6], 16) {
-                return egui::Color32::from_rgb(r, g, b);
-            }
-        }
+    if let Ok(r) = u8::from_str_radix(&hex[0..2], 16)
+        && let Ok(g) = u8::from_str_radix(&hex[2..4], 16)
+        && let Ok(b) = u8::from_str_radix(&hex[4..6], 16)
+    {
+        return egui::Color32::from_rgb(r, g, b);
     }
 
     egui::Color32::from_rgb(255, 107, 107) // Default fallback color

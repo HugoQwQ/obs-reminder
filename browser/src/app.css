@@ -13,6 +13,7 @@
   --toastBorderRadius: 0.5rem;
   --toastContainerLeft: 5px;
   --toastContainerTop: 5px;
+  --toastBoxShadow: 5px;
 }
 
 body {

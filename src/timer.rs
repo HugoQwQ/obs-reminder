@@ -110,11 +110,10 @@ impl TimerService {
         let new_interval = Duration::from_secs(config.toaster.interval_time as u64 * 60);
         
         // If interval changed and timer is running, adjust next toast time
-        if self.interval != new_interval && self.is_running {
-            if let Some(last_time) = self.last_toast_time {
+        if self.interval != new_interval && self.is_running
+            && let Some(last_time) = self.last_toast_time {
                 self.next_toast_time = Some(last_time + new_interval);
             }
-        }
         
         self.interval = new_interval;
         self.switch_mode = config.toaster.content_switch_mode.clone();
