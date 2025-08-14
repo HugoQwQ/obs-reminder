@@ -507,7 +507,8 @@ impl ObsReminderApp {
                 ToastDirection::Bottom => "bottom",
                 ToastDirection::Left => "left",
                 ToastDirection::Right => "right",
-            }.to_string();
+            }
+            .to_string();
 
             let message = WebSocketMessage::new_toast(
                 title.clone(),
@@ -526,10 +527,8 @@ impl ObsReminderApp {
             } else {
                 log::info!("Test toast sent successfully");
 
-                // Set cooldown based on duration setting + 0.3 seconds
-                let cooldown_duration =
-                    std::time::Duration::from_secs(self.config.toaster.duration as u64)
-                        + std::time::Duration::from_millis(300);
+                // Set cooldown to 1.2 seconds
+                let cooldown_duration = std::time::Duration::from_millis(1200);
                 self.test_toast_cooldown = Some(std::time::Instant::now() + cooldown_duration);
             }
         } else {
@@ -572,7 +571,8 @@ impl ObsReminderApp {
                 ToastDirection::Bottom => "bottom",
                 ToastDirection::Left => "left",
                 ToastDirection::Right => "right",
-            }.to_string();
+            }
+            .to_string();
 
             let message = WebSocketMessage::new_toast(
                 title,

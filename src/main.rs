@@ -10,9 +10,9 @@ mod websocket;
 use app::ObsReminderApp;
 use config::Config;
 
-use env_logger::Env;
 use eframe::egui;
 use egui::viewport::IconData;
+use env_logger::Env;
 use std::io::Cursor;
 
 fn load_icon() -> IconData {
@@ -24,12 +24,15 @@ fn load_icon() -> IconData {
     let (width, height) = image.dimensions();
     let rgba = image.into_raw();
 
-    IconData { rgba, width, height }
+    IconData {
+        rgba,
+        width,
+        height,
+    }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), eframe::Error> {
-
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     let config_path = "config.toml";

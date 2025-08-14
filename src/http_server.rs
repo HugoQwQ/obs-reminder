@@ -1,13 +1,13 @@
-use rust_embed::RustEmbed;
+use crate::audio_manager::AudioManager;
+use http_body_util::{BodyExt, Full, combinators::BoxBody};
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
-use hyper::{body::Bytes, Request, Response, StatusCode};
+use hyper::{Request, Response, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
-use http_body_util::{combinators::BoxBody, BodyExt, Full};
-use tokio::net::TcpListener;
+use rust_embed::RustEmbed;
 use std::convert::Infallible;
 use std::net::SocketAddr;
-use crate::audio_manager::AudioManager;
+use tokio::net::TcpListener;
 
 #[derive(RustEmbed)]
 #[folder = "./browser/build/"]
@@ -28,7 +28,7 @@ impl HttpServer {
     pub async fn start(&self) -> Result<(), BoxError> {
         let addr = SocketAddr::from(([127, 0, 0, 1], self.port));
         let listener = TcpListener::bind(addr).await?;
-        
+
         log::info!("HTTP server listening on http://{}", addr);
 
         loop {
@@ -51,12 +51,12 @@ async fn handle_request(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, Infallible>>, Infallible> {
     let path = req.uri().path();
-    
+
     // Handle audio file requests by UUID
     if path.starts_with("/audio/") {
         return handle_audio_request(path).await;
     }
-    
+
     // Remove leading slash and handle root path
     let file_path = if path == "/" {
         "index.html"
@@ -113,7 +113,7 @@ async fn handle_audio_request(
     // Extract the UUID from the URL
     // Format: /audio/uuid
     let file_id = &path[7..]; // Remove "/audio/"
-    
+
     // Create audio manager and get file path
     match AudioManager::new() {
         Ok(audio_manager) => {
@@ -125,8 +125,12 @@ async fn handle_audio_request(
                             .as_ref()
                             .to_string();
 
-                        log::info!("Serving audio file: {} (size: {} bytes, mime: {})", 
-                                  file_path.display(), content.len(), mime_type);
+                        log::info!(
+                            "Serving audio file: {} (size: {} bytes, mime: {})",
+                            file_path.display(),
+                            content.len(),
+                            mime_type
+                        );
 
                         let body = Full::new(Bytes::from(content))
                             .map_err(|never| match never {})

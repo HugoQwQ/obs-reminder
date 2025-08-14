@@ -12,14 +12,14 @@ pub struct ToasterConfig {
     pub titles: Vec<String>,
     pub contents: Vec<String>,
     pub interval_time: u32, // minutes
-    pub duration: u32, // seconds
-    pub color_1: String, // hex color
-    pub color_2: String, // hex color
+    pub duration: u32,      // seconds
+    pub color_1: String,    // hex color
+    pub color_2: String,    // hex color
     pub text_color: String, // hex color for text
     pub content_switch_mode: ContentSwitchMode,
     pub toast_direction: ToastDirection, // animation direction for toast
-    pub enable_sound: bool, // enable/disable sound notifications
-    pub sound_file_id: Option<String>, // UUID of the cached sound file
+    pub enable_sound: bool,              // enable/disable sound notifications
+    pub sound_file_id: Option<String>,   // UUID of the cached sound file
     pub sound_file_name: Option<String>, // original filename for display
 }
 
@@ -56,9 +56,9 @@ impl Default for Config {
                 text_color: "#FFFFFF".to_string(), // white text default
                 content_switch_mode: ContentSwitchMode::Random,
                 toast_direction: ToastDirection::Top, // default from top
-                enable_sound: false, // disabled by default
-                sound_file_id: None, // no custom sound file by default
-                sound_file_name: None, // no filename by default
+                enable_sound: false,                  // disabled by default
+                sound_file_id: None,                  // no custom sound file by default
+                sound_file_name: None,                // no filename by default
             },
         }
     }
