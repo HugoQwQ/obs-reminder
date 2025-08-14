@@ -18,8 +18,6 @@ A lightweight toast notification tool for OBS Studio. Perfect for users who need
 ## Next Steps
 
 - [ ] Add Windows system tray
-- [ ] Improve visual clarity
-- [ ] Add sound notifications
 
 ## Quick Start
 

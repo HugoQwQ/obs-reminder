@@ -36,7 +36,7 @@ async fn main() -> Result<(), eframe::Error> {
     let config = Config::load_or_create_default(config_path);
     let icon = load_icon();
 
-    log::info!("OBS Reminder v{} starting", config.app.version);
+    log::info!("OBS Reminder v{} starting", std::env!("CARGO_PKG_VERSION"));
     log::info!("Configuration loaded successfully");
 
     let options = eframe::NativeOptions {

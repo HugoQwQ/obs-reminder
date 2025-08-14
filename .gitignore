@@ -31,8 +31,6 @@ desktop.ini
 *.sublime-project
 *.sublime-workspace
 
-# --- pnpm lock file (optional, if you want to exclude) ---
-# browser/pnpm-lock.yaml
-
 # --- Other ---
 *.bak
+config.toml

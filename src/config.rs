@@ -4,13 +4,7 @@ use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    pub app: AppConfig,
     pub toaster: ToasterConfig,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AppConfig {
-    pub version: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -52,9 +46,6 @@ pub enum ToastDirection {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            app: AppConfig {
-                version: "0.0.3".to_string(),
-            },
             toaster: ToasterConfig {
                 titles: vec!["提醒标题1".to_string(), "提醒标题2".to_string()],
                 contents: vec!["提醒内容1".to_string(), "提醒内容2".to_string()],
