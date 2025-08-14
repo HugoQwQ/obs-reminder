@@ -40,7 +40,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             app: AppConfig {
-                version: "0.0.2".to_string(),
+                version: "0.0.3".to_string(),
             },
             toaster: ToasterConfig {
                 titles: vec!["提醒标题1".to_string(), "提醒标题2".to_string()],
@@ -65,51 +65,51 @@ impl Config {
         if self.toaster.titles.is_empty() {
             return Err("At least one title is required".to_string());
         }
-        
+
         if self.toaster.contents.is_empty() {
             return Err("At least one content is required".to_string());
         }
-        
+
         // Validate interval time is reasonable (1-1440 minutes = 1 day)
         if self.toaster.interval_time == 0 || self.toaster.interval_time > 1440 {
             return Err("Interval time must be between 1 and 1440 minutes".to_string());
         }
-        
+
         // Validate duration is reasonable (1-60 seconds)
         if self.toaster.duration == 0 || self.toaster.duration > 60 {
             return Err("Toast duration must be between 1 and 60 seconds".to_string());
         }
-        
+
         // Validate hex colors
         if !is_valid_hex_color(&self.toaster.color_1) {
             return Err("Invalid hex color format for color_1".to_string());
         }
-        
+
         if !is_valid_hex_color(&self.toaster.color_2) {
             return Err("Invalid hex color format for color_2".to_string());
         }
-        
+
         if !is_valid_hex_color(&self.toaster.text_color) {
             return Err("Invalid hex color format for text_color".to_string());
         }
-        
+
         Ok(())
     }
-    
+
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
         let content = fs::read_to_string(path)?;
         let config: Config = toml::from_str(&content)?;
         config.validate()?;
         Ok(config)
     }
-    
+
     pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn std::error::Error>> {
         self.validate()?;
         let toml_string = toml::to_string_pretty(self)?;
         fs::write(path, toml_string)?;
         Ok(())
     }
-    
+
     pub fn load_or_create_default<P: AsRef<Path>>(path: P) -> Self {
         match Self::load_from_file(&path) {
             Ok(config) => {
@@ -132,6 +132,6 @@ fn is_valid_hex_color(color: &str) -> bool {
     if !color.starts_with('#') || color.len() != 7 {
         return false;
     }
-    
+
     color[1..].chars().all(|c| c.is_ascii_hexdigit())
 }
