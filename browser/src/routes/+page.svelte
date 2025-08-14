@@ -68,34 +68,34 @@
         console.log('No sound URL provided');
         return;
       }
-      
+
       console.log('Attempting to play sound:', soundUrl);
-      
+
       // 创建音频对象，使用用户选择的音频文件
       const audio = new Audio(soundUrl);
       audio.volume = 0.7; // 设置音量为70%
-      
+
       // 添加事件监听器来调试
       audio.addEventListener('loadstart', () => {
         console.log('Audio loading started');
       });
-      
+
       audio.addEventListener('canplay', () => {
         console.log('Audio can start playing');
       });
-      
+
       audio.addEventListener('error', (e) => {
         console.error('Audio error event:', e);
         console.error('Audio error details:', audio.error);
       });
-      
+
       audio.addEventListener('loadeddata', () => {
         console.log('Audio data loaded');
       });
-      
+
       // 尝试播放
       const playPromise = audio.play();
-      
+
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
@@ -113,7 +113,6 @@
   }
 
   function showToast(data: ToastMessage) {
-    // 如果启用了音效，播放提示音
     if (data.play_sound && data.sound_url) {
       playNotificationSound(data.sound_url);
     }
