@@ -1,0 +1,43 @@
+version: '3'
+
+env:
+  VERSION: 0.1.1
+
+tasks:
+  default:
+    cmds:
+      - task: build-browser
+      - task: build-client
+      - 7z a -tzip "obs-reminder-windows-x64-$VERSION-stable.zip" "target\release\obs-reminder-client.exe"
+
+  # Browser
+  install-dependencies:
+    dir: browser
+    cmds:
+      - pnpm install
+
+  build-browser:
+    dir: browser
+    cmds:
+      - pnpm run build
+
+  format:
+    dir: browser
+    cmds:
+      - pnpm run format
+  # Client
+  build-client:
+    cmds:
+      - cargo build --release
+
+  clippy:
+    cmds:
+      - cargo clippy
+
+  fmt:
+    cmds:
+      - cargo fmt
+
+  dev:
+    cmds:
+      - cargo run
