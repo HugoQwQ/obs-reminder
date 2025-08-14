@@ -40,7 +40,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             app: AppConfig {
-                version: "0.0.1".to_string(),
+                version: "0.0.2".to_string(),
             },
             toaster: ToasterConfig {
                 titles: vec!["提醒标题1".to_string(), "提醒标题2".to_string()],

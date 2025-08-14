@@ -86,22 +86,22 @@ impl ObsReminderApp {
     }
 
     fn render_header(&mut self, ui: &mut egui::Ui) {
-        ui.heading("OBS Reminder v0.0.1");
+        ui.heading("OBS Reminder v0.0.2");
         ui.separator();
     }
 
     fn render_settings(&mut self, ui: &mut egui::Ui) {
-        ui.heading("Settings");
+        ui.heading("设置");
 
         // Toaster titles section
-        ui.label("toaster-title: (allow multi)");
+        ui.label("通知标题: (允许多行)");
 
         // Display existing titles
         let mut titles_to_remove = Vec::new();
         for (i, title) in self.config.toaster.titles.iter_mut().enumerate() {
             ui.horizontal(|ui| {
                 ui.text_edit_singleline(title);
-                if ui.button("Remove").clicked() {
+                if ui.button("移除").clicked() {
                     titles_to_remove.push(i);
                 }
             });
@@ -115,7 +115,7 @@ impl ObsReminderApp {
         // Add new title
         ui.horizontal(|ui| {
             ui.text_edit_singleline(&mut self.new_title);
-            if ui.button("Add Title").clicked() && !self.new_title.is_empty() {
+            if ui.button("添加标题").clicked() && !self.new_title.is_empty() {
                 self.config.toaster.titles.push(self.new_title.clone());
                 self.new_title.clear();
             }
@@ -124,14 +124,14 @@ impl ObsReminderApp {
         ui.separator();
 
         // Toaster contents section
-        ui.label("toaster-content: (allow multi)");
+        ui.label("通知内容: (允许多行)");
 
         // Display existing contents
         let mut contents_to_remove = Vec::new();
         for (i, content) in self.config.toaster.contents.iter_mut().enumerate() {
             ui.horizontal(|ui| {
                 ui.text_edit_singleline(content);
-                if ui.button("Remove").clicked() {
+                if ui.button("移除").clicked() {
                     contents_to_remove.push(i);
                 }
             });
@@ -145,7 +145,7 @@ impl ObsReminderApp {
         // Add new content
         ui.horizontal(|ui| {
             ui.text_edit_singleline(&mut self.new_content);
-            if ui.button("Add Content").clicked() && !self.new_content.is_empty() {
+            if ui.button("添加内容").clicked() && !self.new_content.is_empty() {
                 self.config.toaster.contents.push(self.new_content.clone());
                 self.new_content.clear();
             }
@@ -155,13 +155,13 @@ impl ObsReminderApp {
 
         // Interval time
         ui.horizontal(|ui| {
-            ui.label("interval time: (min)");
+            ui.label("间隔时间: (分钟)");
             ui.add(egui::DragValue::new(&mut self.config.toaster.interval_time).range(1..=1440));
         });
 
         // Duration
         ui.horizontal(|ui| {
-            ui.label("toast duration: (sec)");
+            ui.label("持续时间: (秒)");
             ui.add(egui::DragValue::new(&mut self.config.toaster.duration).range(1..=60));
         });
 
@@ -169,7 +169,7 @@ impl ObsReminderApp {
 
         // Colors
         ui.horizontal(|ui| {
-            ui.label("toaster-color #1:");
+            ui.label("通知颜色 #1:");
 
             // Convert hex string to Color32
             let mut color1 = hex_to_color32(&self.config.toaster.color_1);
@@ -182,7 +182,7 @@ impl ObsReminderApp {
         });
 
         ui.horizontal(|ui| {
-            ui.label("toaster-color #2:");
+            ui.label("通知颜色 #2:");
 
             // Convert hex string to Color32
             let mut color2 = hex_to_color32(&self.config.toaster.color_2);
@@ -195,7 +195,7 @@ impl ObsReminderApp {
         });
 
         ui.horizontal(|ui| {
-            ui.label("text-color:");
+            ui.label("文字颜色:");
 
             // Convert hex string to Color32
             let mut text_color = hex_to_color32(&self.config.toaster.text_color);
@@ -210,34 +210,31 @@ impl ObsReminderApp {
         ui.separator();
 
         // Sound settings
-        ui.heading("Sound Settings");
+        ui.heading("音效设置");
 
         ui.horizontal(|ui| {
-            ui.checkbox(
-                &mut self.config.toaster.enable_sound,
-                "Enable sound notifications",
-            );
+            ui.checkbox(&mut self.config.toaster.enable_sound, "启用音效");
         });
 
         if self.config.toaster.enable_sound {
             ui.horizontal(|ui| {
-                ui.label("Sound file:");
+                ui.label("音效文件:");
                 if let Some(ref name) = self.config.toaster.sound_file_name {
                     ui.label(name);
                 } else {
-                    ui.label("No file selected");
+                    ui.label("没有文件");
                 }
 
-                if ui.button("Browse...").clicked()
+                if ui.button("浏览...").clicked()
                     && let Some(path) = rfd::FileDialog::new()
-                        .add_filter("Audio files", &["mp3", "wav", "ogg", "m4a"])
+                        .add_filter("音频文件", &["mp3", "wav", "ogg", "m4a"])
                         .pick_file()
                 {
                     // Get the filename for display
                     let filename = path
                         .file_name()
                         .and_then(|name| name.to_str())
-                        .unwrap_or("Unknown file")
+                        .unwrap_or("位置文件")
                         .to_string();
 
                     // Create audio manager and add the file
@@ -283,22 +280,22 @@ impl ObsReminderApp {
 
         // Content switch mode
         ui.horizontal(|ui| {
-            ui.label("content-switch-mode:");
+            ui.label("内容切换模式:");
             egui::ComboBox::from_id_salt("switch_mode")
                 .selected_text(match self.config.toaster.content_switch_mode {
-                    ContentSwitchMode::Random => "random",
-                    ContentSwitchMode::Sequential => "sequential",
+                    ContentSwitchMode::Random => "随机",
+                    ContentSwitchMode::Sequential => "顺序",
                 })
                 .show_ui(ui, |ui| {
                     ui.selectable_value(
                         &mut self.config.toaster.content_switch_mode,
                         ContentSwitchMode::Random,
-                        "random",
+                        "随机",
                     );
                     ui.selectable_value(
                         &mut self.config.toaster.content_switch_mode,
                         ContentSwitchMode::Sequential,
-                        "sequential",
+                        "顺序",
                     );
                 });
         });
@@ -308,7 +305,7 @@ impl ObsReminderApp {
         ui.separator();
 
         ui.horizontal(|ui| {
-            let start_button = egui::Button::new("Start").fill(if self.is_running {
+            let start_button = egui::Button::new("开始").fill(if self.is_running {
                 egui::Color32::GRAY
             } else {
                 egui::Color32::from_rgb(0, 150, 0)
@@ -318,7 +315,7 @@ impl ObsReminderApp {
                 self.start_service();
             }
 
-            let stop_button = egui::Button::new("Stop").fill(if !self.is_running {
+            let stop_button = egui::Button::new("停止").fill(if !self.is_running {
                 egui::Color32::GRAY
             } else {
                 egui::Color32::from_rgb(150, 0, 0)
@@ -332,9 +329,9 @@ impl ObsReminderApp {
             let test_button_enabled = !self.is_test_toast_on_cooldown();
             let test_button_text = if let Some(remaining) = self.get_test_toast_cooldown_remaining()
             {
-                format!("Test Toast ({}s)", remaining.as_secs() + 1)
+                format!("测试提示（{}s）", remaining.as_secs() + 1)
             } else {
-                "Test Toast".to_string()
+                "测试提示".to_string()
             };
 
             if ui
@@ -344,7 +341,7 @@ impl ObsReminderApp {
                 self.send_test_toast();
             }
 
-            if ui.button("Save").clicked() {
+            if ui.button("保存").clicked() {
                 self.save_configuration();
             }
         });
@@ -353,7 +350,7 @@ impl ObsReminderApp {
 
         // Status display
         ui.vertical(|ui| {
-            ui.label("Status:");
+            ui.label("信息:");
             let status_color = if self.is_running {
                 egui::Color32::from_rgb(0, 150, 0)
             } else {
@@ -362,19 +359,19 @@ impl ObsReminderApp {
             ui.colored_label(
                 status_color,
                 if self.is_running {
-                    "Running"
+                    "运行中"
                 } else {
-                    "Stopped"
+                    "已停止"
                 },
             );
 
             ui.label("Browser: ");
             ui.horizontal(|ui| {
                 ui.colored_label(egui::Color32::from_rgb(0, 150, 0), "localhost:8080");
-                if ui.button("Copy").clicked() {
+                if ui.button("复制").clicked() {
                     ui.ctx().copy_text("http://localhost:8080".to_string());
                 }
-                if ui.button("Open").clicked() {
+                if ui.button("打开").clicked() {
                     tokio::spawn(async {
                         if let Err(e) = open::that("http://localhost:8080") {
                             log::error!("Failed to open browser: {}", e);
@@ -388,7 +385,7 @@ impl ObsReminderApp {
         if self.is_running {
             ui.separator();
             ui.horizontal(|ui| {
-                ui.label("Next Toast:");
+                ui.label("倒计时:");
                 if let Some(ref timer) = self.timer_service {
                     if let Some(time_left) = timer.get_time_until_next_toast() {
                         let total_seconds = time_left.as_secs();
@@ -396,7 +393,7 @@ impl ObsReminderApp {
                         let seconds = total_seconds % 60;
 
                         let countdown_text = if total_seconds == 0 {
-                            "Sending now...".to_string()
+                            "发送中...".to_string()
                         } else {
                             format!("{}:{:02}", minutes, seconds)
                         };
@@ -411,10 +408,10 @@ impl ObsReminderApp {
 
                         ui.colored_label(countdown_color, countdown_text);
                     } else {
-                        ui.colored_label(egui::Color32::GRAY, "No timer active");
+                        ui.colored_label(egui::Color32::GRAY, "倒计时未开始");
                     }
                 } else {
-                    ui.colored_label(egui::Color32::GRAY, "Timer not available");
+                    ui.colored_label(egui::Color32::GRAY, "倒计时未启用");
                 }
             });
         }
