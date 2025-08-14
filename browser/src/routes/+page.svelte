@@ -13,6 +13,8 @@
     color_2: string;
     text_color: string;
     duration: number;
+    play_sound: boolean;
+    sound_url?: string;
   }
 
   interface WebSocketMessage {
@@ -26,7 +28,7 @@
 
       websocket.onopen = () => {
         console.log("WebSocket connected");
-        toast.push("客户端连接成功");
+        toast.push("OBS Remainer<br><strong>客户端连接成功</strong>");
         isConnected = true;
       };
 
@@ -44,7 +46,7 @@
       websocket.onclose = () => {
         console.log("WebSocket disconnected");
         if (isConnected) {
-          toast.push("客户端已断开连接");
+          toast.push("OBS Remainer<br><strong>客户端连接已断开</strong>");
           console.log("WebSocket disconnected #1");
           isConnected = false;
         }
@@ -60,7 +62,62 @@
     }
   }
 
+  function playNotificationSound(soundUrl?: string) {
+    try {
+      if (!soundUrl) {
+        console.log('No sound URL provided');
+        return;
+      }
+      
+      console.log('Attempting to play sound:', soundUrl);
+      
+      // 创建音频对象，使用用户选择的音频文件
+      const audio = new Audio(soundUrl);
+      audio.volume = 0.7; // 设置音量为70%
+      
+      // 添加事件监听器来调试
+      audio.addEventListener('loadstart', () => {
+        console.log('Audio loading started');
+      });
+      
+      audio.addEventListener('canplay', () => {
+        console.log('Audio can start playing');
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error('Audio error event:', e);
+        console.error('Audio error details:', audio.error);
+      });
+      
+      audio.addEventListener('loadeddata', () => {
+        console.log('Audio data loaded');
+      });
+      
+      // 尝试播放
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('Audio played successfully');
+          })
+          .catch(error => {
+            console.error('Audio play failed:', error);
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+          });
+      }
+    } catch (error) {
+      console.error('Audio creation failed:', error);
+    }
+  }
+
   function showToast(data: ToastMessage) {
+    // 如果启用了音效，播放提示音
+    if (data.play_sound && data.sound_url) {
+      playNotificationSound(data.sound_url);
+    }
+
     toast.push(`${data.title}<br><strong>${data.content}</strong>`, {
       theme: {
         "--toastBackground": data.color_1,

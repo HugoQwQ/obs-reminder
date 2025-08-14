@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod app;
+mod audio_manager;
 mod config;
 mod fonts;
 mod http_server;
@@ -7,7 +8,7 @@ mod timer;
 mod websocket;
 
 use app::ObsReminderApp;
-use catppuccin_egui;
+
 use config::Config;
 use env_logger::Env;
 
@@ -23,7 +24,7 @@ async fn main() -> Result<(), eframe::Error> {
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([400.0, 600.0])
+            .with_inner_size([400.0, 650.0])
             .with_min_inner_size([350.0, 500.0])
             .with_resizable(true),
         ..Default::default()

@@ -10,9 +10,10 @@ contents = [
     "提醒内容1",
     "提醒内容2",
 ]
-interval_time = 1
+interval_time = 5
 duration = 1
 color_1 = "#FF6B6B"
 color_2 = "#4ECDC4"
 text_color = "#FFFFFF"
 content_switch_mode = "random"
+enable_sound = false

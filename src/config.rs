@@ -23,6 +23,9 @@ pub struct ToasterConfig {
     pub color_2: String, // hex color
     pub text_color: String, // hex color for text
     pub content_switch_mode: ContentSwitchMode,
+    pub enable_sound: bool, // enable/disable sound notifications
+    pub sound_file_id: Option<String>, // UUID of the cached sound file
+    pub sound_file_name: Option<String>, // original filename for display
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -48,6 +51,9 @@ impl Default for Config {
                 color_2: "#4ECDC4".to_string(),
                 text_color: "#FFFFFF".to_string(), // white text default
                 content_switch_mode: ContentSwitchMode::Random,
+                enable_sound: false, // disabled by default
+                sound_file_id: None, // no custom sound file by default
+                sound_file_name: None, // no filename by default
             },
         }
     }

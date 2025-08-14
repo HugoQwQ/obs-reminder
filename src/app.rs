@@ -1,3 +1,4 @@
+use crate::audio_manager::AudioManager;
 use crate::config::{Config, ContentSwitchMode};
 use crate::http_server::HttpServer;
 use crate::timer::TimerService;
@@ -212,6 +213,77 @@ impl ObsReminderApp {
 
         ui.separator();
 
+        // Sound settings
+        ui.heading("Sound Settings");
+        
+        ui.horizontal(|ui| {
+            ui.checkbox(&mut self.config.toaster.enable_sound, "Enable sound notifications");
+        });
+
+        if self.config.toaster.enable_sound {
+            ui.horizontal(|ui| {
+                ui.label("Sound file:");
+                if let Some(ref name) = self.config.toaster.sound_file_name {
+                    ui.label(name);
+                } else {
+                    ui.label("No file selected");
+                }
+                
+                if ui.button("Browse...").clicked() {
+                    if let Some(path) = rfd::FileDialog::new()
+                        .add_filter("Audio files", &["mp3", "wav", "ogg", "m4a"])
+                        .pick_file()
+                    {
+                        // Get the filename for display
+                        let filename = path.file_name()
+                            .and_then(|name| name.to_str())
+                            .unwrap_or("Unknown file")
+                            .to_string();
+                        
+                        // Create audio manager and add the file
+                        match AudioManager::new() {
+                            Ok(audio_manager) => {
+                                match audio_manager.add_audio_file(&path) {
+                                    Ok(file_id) => {
+                                        // Remove old file if exists
+                                        if let Some(old_id) = &self.config.toaster.sound_file_id {
+                                            let _ = audio_manager.remove_audio_file(old_id);
+                                        }
+                                        
+                                        self.config.toaster.sound_file_id = Some(file_id);
+                                        self.config.toaster.sound_file_name = Some(filename);
+                                        log::info!("Audio file added successfully");
+                                    }
+                                    Err(e) => {
+                                        log::error!("Failed to add audio file: {}", e);
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Failed to create audio manager: {}", e);
+                            }
+                        }
+                    }
+                }
+                
+                if self.config.toaster.sound_file_id.is_some() {
+                    if ui.button("Clear").clicked() {
+                        // Remove the cached file
+                        if let Some(file_id) = &self.config.toaster.sound_file_id {
+                            if let Ok(audio_manager) = AudioManager::new() {
+                                let _ = audio_manager.remove_audio_file(file_id);
+                            }
+                        }
+                        
+                        self.config.toaster.sound_file_id = None;
+                        self.config.toaster.sound_file_name = None;
+                    }
+                }
+            });
+        }
+
+        ui.separator();
+
         // Content switch mode
         ui.horizontal(|ui| {
             ui.label("content-switch-mode:");
@@ -390,6 +462,16 @@ impl ObsReminderApp {
         );
 
         if let Some(ref sender) = self.websocket_sender {
+            let sound_url = if self.config.toaster.enable_sound {
+                self.config.toaster.sound_file_id.as_ref().map(|id| {
+                    let url = format!("/audio/{}", id);
+                    log::info!("Generated test sound URL: {} for ID: {}", url, id);
+                    url
+                })
+            } else {
+                None
+            };
+
             let message = WebSocketMessage::new_toast(
                 title.clone(),
                 content.clone(),
@@ -397,6 +479,8 @@ impl ObsReminderApp {
                 self.config.toaster.color_2.clone(),
                 self.config.toaster.text_color.clone(),
                 self.config.toaster.duration,
+                self.config.toaster.enable_sound,
+                sound_url,
             );
 
             if let Err(e) = sender.send(message) {
@@ -435,6 +519,16 @@ impl ObsReminderApp {
         );
 
         if let Some(ref sender) = self.websocket_sender {
+            let sound_url = if self.config.toaster.enable_sound {
+                self.config.toaster.sound_file_id.as_ref().map(|id| {
+                    let url = format!("/audio/{}", id);
+                    log::info!("Generated automatic sound URL: {} for ID: {}", url, id);
+                    url
+                })
+            } else {
+                None
+            };
+
             let message = WebSocketMessage::new_toast(
                 title,
                 content,
@@ -442,6 +536,8 @@ impl ObsReminderApp {
                 self.config.toaster.color_2.clone(),
                 self.config.toaster.text_color.clone(),
                 self.config.toaster.duration,
+                self.config.toaster.enable_sound,
+                sound_url,
             );
 
             if let Err(e) = sender.send(message) {

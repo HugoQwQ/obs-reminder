@@ -16,6 +16,8 @@ pub struct ToastMessage {
     pub color_2: String,
     pub text_color: String,
     pub duration: u32,
+    pub play_sound: bool,
+    pub sound_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -25,7 +27,7 @@ pub struct WebSocketMessage {
 }
 
 impl WebSocketMessage {
-    pub fn new_toast(title: String, content: String, color_1: String, color_2: String, text_color: String, duration_seconds: u32) -> Self {
+    pub fn new_toast(title: String, content: String, color_1: String, color_2: String, text_color: String, duration_seconds: u32, play_sound: bool, sound_url: Option<String>) -> Self {
         Self {
             r#type: "toast".to_string(),
             data: ToastMessage {
@@ -35,6 +37,8 @@ impl WebSocketMessage {
                 color_2,
                 text_color,
                 duration: duration_seconds * 1000, // Convert to milliseconds
+                play_sound,
+                sound_url,
             },
         }
     }

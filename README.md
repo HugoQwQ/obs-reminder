@@ -10,16 +10,16 @@ A lightweight toast notification tool for OBS Studio. Perfect for users who need
 
 ## Features
 
-* **Light, fast, and simple**: Built with Rust and egui for an easy-to-use interface
-* **Multi-software integration**: Works with any streaming or recording tool that supports browser sources
-* **Highly customizable settings**: Configure multiple titles, messages, colors, display durations, etc.
-* **Live preview**: Test toast notifications in real time
+- **Light, fast, and simple**: Built with Rust and egui for an easy-to-use interface
+- **Multi-software integration**: Works with any streaming or recording tool that supports browser sources (even browsers)
+- **Highly customizable settings**: Configure multiple titles, messages, colors, display durations, etc.
+- **Live preview**: Test toast notifications in real time
 
-## Roadmap
+## Next Steps
 
-* [ ] Add Windows system tray
-* [ ] Improve visual clarity
-* [ ] Add sound notifications
+- [ ] Add Windows system tray
+- [ ] Improve visual clarity
+- [ ] Add sound notifications
 
 ## Quick Start
 
@@ -62,7 +62,7 @@ Settings are saved in `config.toml` in the same directory. You can also edit it 
 version = "0.0.1"
 
 [toaster]
-titles = ["haha", "not good", "alright"]
+titles = ["bbb", "114514", "alright"]
 contents = ["im content", "hoho", "what can i say?"]
 interval_time = 30  # minutes
 duration = 5        # seconds
@@ -174,7 +174,7 @@ If you find this project helpful, please consider:
 * 🐛 Reporting issues
 * 💡 Suggesting features
 * 📖 Improving documentation
-* 😍 Donating me
+* 😍 Buy me coffee
 
 ---
 
