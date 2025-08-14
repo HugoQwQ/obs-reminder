@@ -1,6 +1,6 @@
 # OBS Reminder
 
-*Other language versions: [简体中文](README-zh.md) | [繁體中文](README-TW.md)*
+*Other language versions: [简体中文](README-CN.md) | [繁體中文](README-TW.md)*
 
 A lightweight toast notification tool for OBS Studio. Perfect for users who need periodic reminders during live streaming or recording.
 

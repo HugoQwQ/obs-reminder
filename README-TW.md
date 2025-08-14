@@ -1,6 +1,6 @@
 # OBS Reminder (繁體中文)
 
-*其他語言版本：[English](README.md) | [简体中文](README-zh.md) | 繁體中文*
+*其他語言版本：[English](README.md) | [简体中文](README-CN.md) | 繁體中文*
 
 一款可在 OBS Studio 顯示自訂 Toast 提醒的輕量工具，非常適合在直播或錄製過程中需要定期提醒的使用者。
 
