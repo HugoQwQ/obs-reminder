@@ -14,6 +14,7 @@ pub struct ToastMessage {
     pub content: String,
     pub color_1: String,
     pub color_2: String,
+    pub text_color: String,
     pub duration: u32,
 }
 
@@ -24,7 +25,7 @@ pub struct WebSocketMessage {
 }
 
 impl WebSocketMessage {
-    pub fn new_toast(title: String, content: String, color_1: String, color_2: String, duration_seconds: u32) -> Self {
+    pub fn new_toast(title: String, content: String, color_1: String, color_2: String, text_color: String, duration_seconds: u32) -> Self {
         Self {
             r#type: "toast".to_string(),
             data: ToastMessage {
@@ -32,6 +33,7 @@ impl WebSocketMessage {
                 content,
                 color_1,
                 color_2,
+                text_color,
                 duration: duration_seconds * 1000, // Convert to milliseconds
             },
         }
@@ -65,7 +67,7 @@ impl WebSocketServer {
         self.sender.clone()
     }
     
-    pub async fn get_client_count(&self) -> usize {
+    pub async fn _get_client_count(&self) -> usize {
         *self.client_count.lock().await
     }
     
@@ -95,7 +97,7 @@ impl WebSocketServer {
         }
     }
     
-    pub async fn broadcast(&self, message: WebSocketMessage) -> Result<(), broadcast::error::SendError<WebSocketMessage>> {
+    pub async fn _broadcast(&self, message: WebSocketMessage) -> Result<(), broadcast::error::SendError<WebSocketMessage>> {
         log::debug!("Broadcasting message: {:?}", message);
         self.sender.send(message)?;
         Ok(())

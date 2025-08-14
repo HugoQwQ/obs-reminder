@@ -1,10 +1,12 @@
 use crate::config::{Config, ContentSwitchMode};
+use crate::http_server::HttpServer;
 use crate::timer::TimerService;
 use crate::websocket::{WebSocketMessage, WebSocketServer};
 use eframe::egui;
 use std::sync::Arc;
 use tokio::sync::broadcast;
 
+#[warn(dead_code)]
 pub struct ObsReminderApp {
     config: Config,
     config_path: String,
@@ -17,11 +19,11 @@ pub struct ObsReminderApp {
     websocket_server: Option<Arc<WebSocketServer>>,
     websocket_sender: Option<broadcast::Sender<WebSocketMessage>>,
     timer_service: Option<TimerService>,
+    http_server: Option<HttpServer>,
 
     // Status
     is_running: bool,
     connection_status: String,
-    client_count: usize,
 
     // Test toast cooldown
     test_toast_cooldown: Option<std::time::Instant>,
@@ -29,17 +31,38 @@ pub struct ObsReminderApp {
 
 impl ObsReminderApp {
     pub fn new(config: Config, config_path: String) -> Self {
+        // Initialize WebSocket server immediately on startup
+        let websocket_server = Arc::new(WebSocketServer::new());
+        let websocket_sender = websocket_server.get_sender();
+
+        // Start WebSocket server in background
+        let server_clone = websocket_server.clone();
+        tokio::spawn(async move {
+            if let Err(e) = server_clone.start().await {
+                log::error!("WebSocket server error: {}", e);
+            }
+        });
+
+        // Initialize and start HTTP server
+        let http_server = HttpServer::new(8080);
+        let http_server_clone = http_server.clone();
+        tokio::spawn(async move {
+            if let Err(e) = http_server_clone.start().await {
+                log::error!("HTTP server error: {}", e);
+            }
+        });
+
         Self {
             timer_service: Some(TimerService::new(&config)),
-            websocket_server: None,
-            websocket_sender: None,
+            websocket_server: Some(websocket_server),
+            websocket_sender: Some(websocket_sender),
+            http_server: Some(http_server),
             config,
             config_path,
             new_title: String::new(),
             new_content: String::new(),
             is_running: false,
-            connection_status: "Not Started".to_string(),
-            client_count: 0,
+            connection_status: "Servers Ready".to_string(),
             test_toast_cooldown: None,
         }
     }
@@ -65,29 +88,8 @@ impl ObsReminderApp {
         }
     }
 
-    fn initialize_websocket(&mut self) {
-        if self.websocket_server.is_none() {
-            let websocket_server = Arc::new(WebSocketServer::new());
-            let websocket_sender = websocket_server.get_sender();
-
-            // Start WebSocket server in background
-            let server_clone = websocket_server.clone();
-            tokio::spawn(async move {
-                if let Err(e) = server_clone.start().await {
-                    log::error!("WebSocket server error: {}", e);
-                }
-            });
-
-            self.websocket_server = Some(websocket_server);
-            self.websocket_sender = Some(websocket_sender);
-            self.connection_status = "WebSocket Started".to_string();
-            log::info!("WebSocket server initialized");
-        }
-    }
-
     fn render_header(&mut self, ui: &mut egui::Ui) {
         ui.heading("OBS Reminder v0.0.1");
-
         ui.separator();
     }
 
@@ -195,6 +197,19 @@ impl ObsReminderApp {
             ui.label(&self.config.toaster.color_2);
         });
 
+        ui.horizontal(|ui| {
+            ui.label("text-color:");
+
+            // Convert hex string to Color32
+            let mut text_color = hex_to_color32(&self.config.toaster.text_color);
+
+            if ui.color_edit_button_srgba(&mut text_color).changed() {
+                self.config.toaster.text_color = color32_to_hex(text_color);
+            }
+
+            ui.label(&self.config.toaster.text_color);
+        });
+
         ui.separator();
 
         // Content switch mode
@@ -268,7 +283,7 @@ impl ObsReminderApp {
         ui.separator();
 
         // Status display
-        ui.horizontal(|ui| {
+        ui.vertical(|ui| {
             ui.label("Status:");
             let status_color = if self.is_running {
                 egui::Color32::from_rgb(0, 150, 0)
@@ -284,18 +299,13 @@ impl ObsReminderApp {
                 },
             );
 
-            ui.separator();
-
-            ui.label("WebSocket:");
-            let ws_color = if self.client_count > 0 {
-                egui::Color32::from_rgb(0, 150, 0)
-            } else {
-                egui::Color32::from_rgb(150, 150, 0)
-            };
-            ui.colored_label(
-                ws_color,
-                format!("Port 7981 ({} clients)", self.client_count),
-            );
+            ui.label("Browser: ");
+            ui.horizontal(|ui| {
+                ui.colored_label(egui::Color32::from_rgb(0, 150, 0), "localhost:8080");
+                if ui.button("Copy").clicked() {
+                    ui.ctx().copy_text("http://localhost:8080".to_string());
+                }
+            });
         });
 
         // Timer countdown display
@@ -340,9 +350,6 @@ impl ObsReminderApp {
             return;
         }
 
-        // Initialize WebSocket server if not already done
-        self.initialize_websocket();
-
         self.is_running = true;
 
         // Update timer service with current config
@@ -351,8 +358,8 @@ impl ObsReminderApp {
             timer.start();
         }
 
-        self.connection_status = "Running".to_string();
-        log::info!("Service started");
+        self.connection_status = "Timer Running".to_string();
+        log::info!("Timer service started");
     }
 
     fn stop_service(&mut self) {
@@ -363,7 +370,7 @@ impl ObsReminderApp {
             timer.stop();
         }
 
-        self.connection_status = "Stopped".to_string();
+        self.connection_status = "WebSocket Ready".to_string();
         log::info!("Service stopped");
     }
 
@@ -372,9 +379,6 @@ impl ObsReminderApp {
             log::warn!("Cannot send test toast: no titles or contents configured");
             return;
         }
-
-        // Initialize WebSocket server if not already done
-        self.initialize_websocket();
 
         let title = &self.config.toaster.titles[0];
         let content = &self.config.toaster.contents[0];
@@ -391,6 +395,7 @@ impl ObsReminderApp {
                 content.clone(),
                 self.config.toaster.color_1.clone(),
                 self.config.toaster.color_2.clone(),
+                self.config.toaster.text_color.clone(),
                 self.config.toaster.duration,
             );
 
@@ -435,6 +440,7 @@ impl ObsReminderApp {
                 content,
                 self.config.toaster.color_1.clone(),
                 self.config.toaster.color_2.clone(),
+                self.config.toaster.text_color.clone(),
                 self.config.toaster.duration,
             );
 

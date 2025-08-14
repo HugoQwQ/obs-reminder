@@ -4,6 +4,3 @@
 .kiro/
 .cursor/
 .idea/
-
-# Production build artifacts
-client/browser/

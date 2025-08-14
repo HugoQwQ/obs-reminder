@@ -73,7 +73,7 @@ impl TimerService {
         false
     }
     
-    pub fn reset_timer(&mut self) {
+    pub fn _reset_timer(&mut self) {
         if self.is_running {
             let now = Instant::now();
             self.last_toast_time = Some(now);

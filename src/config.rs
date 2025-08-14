@@ -21,6 +21,7 @@ pub struct ToasterConfig {
     pub duration: u32, // seconds
     pub color_1: String, // hex color
     pub color_2: String, // hex color
+    pub text_color: String, // hex color for text
     pub content_switch_mode: ContentSwitchMode,
 }
 
@@ -45,6 +46,7 @@ impl Default for Config {
                 duration: 5, // 5 seconds default
                 color_1: "#FF6B6B".to_string(),
                 color_2: "#4ECDC4".to_string(),
+                text_color: "#FFFFFF".to_string(), // white text default
                 content_switch_mode: ContentSwitchMode::Random,
             },
         }
@@ -79,6 +81,10 @@ impl Config {
         
         if !is_valid_hex_color(&self.toaster.color_2) {
             return Err("Invalid hex color format for color_2".to_string());
+        }
+        
+        if !is_valid_hex_color(&self.toaster.text_color) {
+            return Err("Invalid hex color format for text_color".to_string());
         }
         
         Ok(())
