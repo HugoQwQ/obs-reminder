@@ -102,6 +102,23 @@ content_switch_mode = "random"  # 或 "sequential" 即隨機、順序
 
 ### 構建步驟
 
+注意：方法一中Windows必須安裝7zip
+```bash
+# Clone repository
+git clone https://github.com/HugoQwQ/obs-reminder.git
+cd obs-reminder
+
+# Linux & Macos
+chmod +x ./scripts/build.sh
+./scripts/build_and_package.sh
+
+# Windows
+.\scripts\build.bat
+
+```
+
+或者
+
 ```bash
 # 克隆倉庫
 git clone https://github.com/HugoQwQ/obs-reminder.git

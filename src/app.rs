@@ -86,7 +86,7 @@ impl ObsReminderApp {
     }
 
     fn render_header(&mut self, ui: &mut egui::Ui) {
-        ui.heading("OBS Reminder v0.0.2");
+        ui.heading("OBS Reminder v0.0.3");
         ui.separator();
     }
 

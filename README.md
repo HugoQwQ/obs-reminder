@@ -102,6 +102,23 @@ content_switch_mode = "random"  # or "sequential"
 
 ### Build Steps
 
+Note: Method one Windows must install 7zip
+```bash
+# Clone repository
+git clone https://github.com/HugoQwQ/obs-reminder.git
+cd obs-reminder
+
+# Linux & Macos
+chmod +x ./scripts/build.sh
+./scripts/build_and_package.sh
+
+# Windows
+.\scripts\build.bat
+
+```
+
+OR
+
 ```bash
 # Clone repository
 git clone https://github.com/HugoQwQ/obs-reminder.git

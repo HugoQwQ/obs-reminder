@@ -1,8 +1,38 @@
-.DS_Store
-**/target
-.vscode/
-.kiro/
-.cursor/
-.idea/
+# --- Rust build output ---
+/target/
 
-config.toml
+# --- Frontend build output ---
+browser/node_modules/
+browser/build/
+browser/.svelte-kit
+
+# --- Build artifacts (ZIP packages) ---
+*.zip
+
+# --- Temporary / log files ---
+*.log
+*.tmp
+*.temp
+
+# --- OS-specific junk ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# --- Editor / IDE config ---
+.vscode/
+.idea/
+.kiro/
+*.sublime-project
+*.sublime-workspace
+
+# --- pnpm lock file (optional, if you want to exclude) ---
+# browser/pnpm-lock.yaml
+
+# --- Other ---
+*.bak

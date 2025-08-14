@@ -1,0 +1,19 @@
+[app]
+version = "0.0.2"
+
+[toaster]
+titles = [
+    "提醒标题1",
+    "提醒标题2",
+]
+contents = [
+    "提醒内容1",
+    "提醒内容2",
+]
+interval_time = 5
+duration = 5
+color_1 = "#FF6B6B"
+color_2 = "#4ECDC4"
+text_color = "#FFFFFF"
+content_switch_mode = "random"
+enable_sound = false
