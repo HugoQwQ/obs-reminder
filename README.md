@@ -4,6 +4,10 @@
 
 A lightweight toast notification tool for OBS Studio. Perfect for users who need periodic reminders during live streaming or recording.
 
+## Screenshots
+
+[see in here](screenshots.md)
+
 ## Features
 
 * **Light, fast, and simple**: Built with Rust and egui for an easy-to-use interface
