@@ -1,6 +1,12 @@
 # OBS Reminder
 
-*Other language versions: [简体中文](README-CN.md) | [繁體中文](README-TW.md)*
+<p align="center">
+    <a href="https://discord.gg/Hvz9Axh84z">
+        <img alt="BilibiliShowcase  " src="https://img.shields.io/badge/Bilibili-Showcase-blue"/></a>
+    <a href="README_CN.md"><img alt="CN doc" src="https://img.shields.io/badge/docs-简体中文-white" /></a>
+    <a href="README_TW.md"><img alt="TW doc" src="https://img.shields.io/badge/docs-繁體中文-white.svg" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=GPL&color=white&style=flat" alt="License"/></a>
+</p>
 
 A lightweight toast notification tool for OBS Studio. Perfect for users who need periodic reminders during live streaming or recording.
 
