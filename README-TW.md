@@ -1,6 +1,12 @@
 # OBS Reminder (繁體中文)
 
-*其他語言版本：English | 简体中文 | 繁體中文*
+<p align="center">
+    <a href="https://discord.gg/Hvz9Axh84z">
+        <img alt="BilibiliShowcase  " src="https://img.shields.io/badge/Bilibili-Showcase-blue"/></a>
+    <a href="README_CN.md"><img alt="CN doc" src="https://img.shields.io/badge/docs-简体中文-white" /></a>
+    <a href="README_TW.md"><img alt="TW doc" src="https://img.shields.io/badge/docs-繁體中文-white.svg" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=GPL&color=white&style=flat" alt="License"/></a>
+</p>
 
 一款可在 OBS Studio 顯示自訂通知提醒的輕量工具，非常適合在直播或錄製過程中需要定期提醒的使用者。
 
